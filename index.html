@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>타자연습</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>타자 연습</h1>
+
+    <!-- 윗줄: 연습할 문장 -->
+    <div id="quote">빠르게 그리고 정확하게 입력해보세요!</div>
+
+    <!-- 아랫줄: 내가 입력하는 텍스트가 보일 위치 -->
+    <div id="inputDisplay"></div>
+
+    <!-- 실제 입력은 숨겨진 input에서 이루어짐 -->
+    <input type="text" id="inputBox" disabled autocomplete="off" autocorrect="off" spellcheck="false" />
+
+    <!-- 결과 출력 -->
+    <div id="result"></div>
+
+    <!-- 시작 버튼 -->
+    <button onclick="startTest()">시작하기</button>
+
+    <!-- 외부 JS 파일 연결 -->
+    <script src="main.js"></script>
+  </body>
+</html>
