@@ -12,61 +12,140 @@ function startTest() {
   currentSentence = sentences[Math.floor(Math.random() * sentences.length)];
   document.getElementById("quote").innerText = currentSentence;
   const inputBox = document.getElementById("inputBox");
-  const inputDisplay = document.getElementById("inputDisplay");
   inputBox.value = "";
-  inputDisplay.innerHTML = "";
   inputBox.disabled = false;
   inputBox.focus();
   startTime = new Date();
   document.getElementById("result").innerText = "";
 
-  // 이벤트 등록은 여기서만
+  inputBox.removeEventListener("input", updateDisplay);
   inputBox.addEventListener("input", updateDisplay);
-  inputBox.addEventListener("compositionend", checkForFinish);
+}
+
+function disassembleHangul(str) {
+  const chosung = [
+    "ㄱ",
+    "ㄲ",
+    "ㄴ",
+    "ㄷ",
+    "ㄸ",
+    "ㄹ",
+    "ㅁ",
+    "ㅂ",
+    "ㅃ",
+    "ㅅ",
+    "ㅆ",
+    "ㅇ",
+    "ㅈ",
+    "ㅉ",
+    "ㅊ",
+    "ㅋ",
+    "ㅌ",
+    "ㅍ",
+    "ㅎ",
+  ];
+  const jungsung = [
+    "ㅏ",
+    "ㅐ",
+    "ㅑ",
+    "ㅒ",
+    "ㅓ",
+    "ㅔ",
+    "ㅕ",
+    "ㅖ",
+    "ㅗ",
+    "ㅘ",
+    "ㅙ",
+    "ㅚ",
+    "ㅛ",
+    "ㅜ",
+    "ㅝ",
+    "ㅞ",
+    "ㅟ",
+    "ㅠ",
+    "ㅡ",
+    "ㅢ",
+    "ㅣ",
+  ];
+  const jongsung = [
+    "",
+    "ㄱ",
+    "ㄲ",
+    "ㄳ",
+    "ㄴ",
+    "ㄵ",
+    "ㄶ",
+    "ㄷ",
+    "ㄹ",
+    "ㄺ",
+    "ㄻ",
+    "ㄼ",
+    "ㄽ",
+    "ㄾ",
+    "ㄿ",
+    "ㅀ",
+    "ㅁ",
+    "ㅂ",
+    "ㅄ",
+    "ㅅ",
+    "ㅆ",
+    "ㅇ",
+    "ㅈ",
+    "ㅊ",
+    "ㅋ",
+    "ㅌ",
+    "ㅍ",
+    "ㅎ",
+  ];
+
+  const result = [];
+  for (let char of str) {
+    const code = char.charCodeAt(0);
+    if (code >= 0xac00 && code <= 0xd7a3) {
+      const base = code - 0xac00;
+      const cho = Math.floor(base / (21 * 28));
+      const jung = Math.floor((base % (21 * 28)) / 28);
+      const jong = base % 28;
+      result.push(chosung[cho], jungsung[jung]);
+      if (jong !== 0) result.push(jongsung[jong]);
+    } else {
+      result.push(char);
+    }
+  }
+  return result;
 }
 
 function updateDisplay() {
   const inputBox = document.getElementById("inputBox");
-  const inputDisplay = document.getElementById("inputDisplay");
-  let highlighted = "";
+  const input = inputBox.value;
 
-  for (let i = 0; i < currentSentence.length; i++) {
-    if (i < inputBox.value.length) {
-      if (!isHangulComplete(inputBox.value[i])) {
-        highlighted += `<span>${currentSentence[i]}</span>`;
-      } else {
-        if (inputBox.value[i] === currentSentence[i]) {
-          highlighted += `<span style="color: black;">${currentSentence[i]}</span>`;
-        } else {
-          highlighted += `<span style="color: red;">${currentSentence[i]}</span>`;
-        }
+  let hasError = false;
+
+  for (let i = 0; i < input.length; i++) {
+    const inputChar = input[i];
+    const targetChar = currentSentence[i] || "";
+
+    const inputDis = disassembleHangul(inputChar);
+    const targetDis = disassembleHangul(targetChar);
+
+    for (let j = 0; j < inputDis.length; j++) {
+      if (inputDis[j] !== targetDis[j]) {
+        hasError = true;
+        break;
       }
-    } else {
-      highlighted += `<span>${currentSentence[i]}</span>`;
     }
+    if (hasError) break;
   }
-  inputDisplay.innerHTML = highlighted;
-}
 
-function checkForFinish() {
-  const inputBox = document.getElementById("inputBox");
-  if (inputBox.value.length === currentSentence.length && isAllHangulComplete(inputBox.value)) {
+  if (hasError) {
+    inputBox.style.color = "red";
+  } else {
+    inputBox.style.color = "black";
+  }
+
+  if (input.length === currentSentence.length) {
     finishTest();
   }
-}
-
-function isHangulComplete(char) {
-  const code = char.charCodeAt(0);
-  return code >= 0xac00 && code <= 0xd7a3;
-}
-
-function isAllHangulComplete(input) {
-  for (let i = 0; i < input.length; i++) {
-    if (!isHangulComplete(input[i]) && input[i] !== " " && input[i] !== "." && input[i] !== ",") {
-      return false;
-    }
-  }
-  return true;
 }
 
 function finishTest() {
